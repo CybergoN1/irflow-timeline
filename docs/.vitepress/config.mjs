@@ -32,7 +32,8 @@ export default defineConfig({
           items: [
             { text: 'Installation', link: '/getting-started/installation' },
             { text: 'Quick Start', link: '/getting-started/quick-start' },
-            { text: 'Supported Formats', link: '/getting-started/supported-formats' }
+            { text: 'Supported Formats', link: '/getting-started/supported-formats' },
+            { text: 'Architecture', link: '/getting-started/architecture' }
           ]
         }
       ],
@@ -104,7 +105,6 @@ export default defineConfig({
           text: 'About',
           items: [
             { text: 'Author', link: '/about/author' },
-            { text: 'Architecture', link: '/about/architecture' },
             { text: 'Changelog', link: '/about/changelog' },
             { text: 'Credits', link: '/about/credits' }
           ]
