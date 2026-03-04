@@ -1,0 +1,30 @@
+{
+  "name": "irflow-timeline-tui",
+  "version": "1.0.0-beta",
+  "description": "IRFlow Timeline TUI — High-performance DFIR timeline viewer for the terminal",
+  "main": "lib/app.js",
+  "bin": {
+    "irflow-tui": "./bin/irflow-tui.js"
+  },
+  "scripts": {
+    "start": "node bin/irflow-tui.js",
+    "rebuild": "npm rebuild better-sqlite3",
+    "test": "node test/index.js",
+    "test:smoke": "node test/smoke-test.js",
+    "test:detection": "node test/detection-test.js",
+    "test:perf": "node test/perf-bench.js",
+    "test:docker": "bash test/docker-test.sh",
+    "test:all": "node test/index.js --smoke --detection --perf --docker"
+  },
+  "author": "DFIR Community",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ts-evtx/core": "^1.1.1",
+    "@ts-evtx/messages": "^1.1.1",
+    "better-sqlite3": "^11.7.0",
+    "csv-parser": "^3.0.0",
+    "exceljs": "^4.4.0",
+    "neo-blessed": "^0.2.0",
+    "xlsx": "^0.18.5"
+  }
+}

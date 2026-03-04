@@ -1,0 +1,15 @@
+node_modules/
+dist/
+release/
+*.db
+*.db-wal
+*.db-shm
+.DS_Store
+docs/.vitepress/dist
+docs/.vitepress/cache
+CLAUDE.md
+.env*
+*.pem
+*.key
+*.pfx
+*.p12

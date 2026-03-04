@@ -1,0 +1,111 @@
+{
+    "name": "irflow-timeline",
+    "version": "1.0.0-beta",
+    "description": "IRFlow Timeline — High-performance DFIR timeline viewer for Windows (30-50GB+ CSV/XLSX)",
+    "main": "electron/main.js",
+    "author": "DFIR Community",
+    "license": "MIT",
+    "scripts": {
+        "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+        "build:renderer": "vite build",
+        "start": "npm run build:renderer && electron .",
+        "dist": "npm run build:renderer && electron-builder --win",
+        "dist:nsis": "npm run build:renderer && electron-builder --win nsis",
+        "dist:portable": "npm run build:renderer && electron-builder --win portable",
+        "rebuild": "electron-rebuild -f -w better-sqlite3",
+        "postinstall": "patch-package",
+        "docs:dev": "vitepress dev docs",
+        "docs:build": "vitepress build docs",
+        "docs:preview": "vitepress preview docs"
+    },
+    "build": {
+        "appId": "com.dfir.irflow-timeline",
+        "productName": "IRFlow Timeline",
+        "win": {
+            "icon": "assets/icon.ico",
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": [
+                        "x64"
+                    ]
+                },
+                {
+                    "target": "portable",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ]
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "IRFlow Timeline"
+        },
+        "portable": {
+            "artifactName": "IRFlow-Timeline-${version}-portable.exe"
+        },
+        "files": [
+            "dist/**/*",
+            "electron/**/*",
+            "assets/**/*"
+        ],
+        "asarUnpack": [
+            "node_modules/better-sqlite3/**"
+        ],
+        "directories": {
+            "output": "release"
+        },
+        "fileAssociations": [
+            {
+                "ext": "csv",
+                "name": "CSV File",
+                "role": "Viewer"
+            },
+            {
+                "ext": "tsv",
+                "name": "TSV File",
+                "role": "Viewer"
+            },
+            {
+                "ext": "xlsx",
+                "name": "Excel File",
+                "role": "Viewer"
+            },
+            {
+                "ext": "plaso",
+                "name": "Plaso File",
+                "role": "Viewer"
+            },
+            {
+                "ext": "evtx",
+                "name": "EVTX File",
+                "role": "Viewer"
+            }
+        ]
+    },
+    "devDependencies": {
+        "@electron/rebuild": "^3.6.0",
+        "@vitejs/plugin-react": "^4.3.4",
+        "concurrently": "^9.1.0",
+        "electron": "^33.2.1",
+        "electron-builder": "^25.1.8",
+        "patch-package": "^8.0.1",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "vite": "^6.0.7",
+        "vitepress": "^1.6.4",
+        "wait-on": "^8.0.1"
+    },
+    "dependencies": {
+        "@ts-evtx/core": "^1.1.1",
+        "@ts-evtx/messages": "^1.1.1",
+        "better-sqlite3": "^11.7.0",
+        "csv-parser": "^3.0.0",
+        "exceljs": "^4.4.0",
+        "xlsx": "^0.18.5"
+    }
+}

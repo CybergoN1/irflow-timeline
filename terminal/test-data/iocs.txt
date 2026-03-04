@@ -1,0 +1,46 @@
+# IOC List — Threat Intel Feed
+# Last updated: 2024-11-15
+# Source: DFIR Investigation Case #2024-1115
+
+# C2 Infrastructure
+185.220.101.42
+91.234.56.78
+evil-c2.com
+evil-c2[.]com
+hxxp://evil-c2.com/beacon.exe
+hxxp://evil-c2.com/stage2.ps1
+hxxp://evil-c2.com/update
+
+# Malicious Files (SHA256)
+a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+beacon.exe
+svc.exe
+crypt.exe
+payload.dll
+procdump.exe
+mimikatz.exe
+
+# Suspicious Account
+admin_backdoor
+attacker
+
+# Suspicious Destinations
+10.0.0.99
+UNKNOWN-PC
+
+# Persistence Artifacts
+WindowsUpdate
+EvilSvc
+EvilConsumer
+EvilFilter
+
+# MITRE Techniques (as search terms)
+certutil.*urlcache
+schtasks.*create
+vssadmin.*delete
+bcdedit.*recovery
+wbadmin.*delete
+Invoke-Mimikatz
+sekurlsa
+procdump.*lsass
+-enc JAB

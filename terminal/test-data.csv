@@ -1,0 +1,31 @@
+datetime,timestamp_desc,source,source_long,message,filename,hostname,username,process_name,parent_process,pid,ppid,event_id
+2024-03-15 08:12:01,Content Modification Time,WEBHIST,Chrome History,https://mail.google.com/mail/inbox,History,WORKSTATION-PC,jsmith,chrome.exe,explorer.exe,4512,1820,
+2024-03-15 08:15:22,Content Modification Time,WEBHIST,Chrome History,https://drive.google.com/drive/shared,History,WORKSTATION-PC,jsmith,chrome.exe,explorer.exe,4512,1820,
+2024-03-15 09:01:45,Creation Time,FILE,NTFS $MFT,C:\Users\jsmith\Downloads\Q1-Report.docx,MFT,WORKSTATION-PC,jsmith,,,,,
+2024-03-15 09:02:10,Last Access Time,FILE,NTFS $MFT,C:\Users\jsmith\Downloads\Q1-Report.docx,MFT,WORKSTATION-PC,jsmith,,,,,
+2024-03-15 09:03:33,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: winword.exe,Sysmon.evtx,WORKSTATION-PC,jsmith,winword.exe,explorer.exe,5680,1820,1
+2024-03-15 09:05:12,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: cmd.exe,Sysmon.evtx,WORKSTATION-PC,jsmith,cmd.exe,winword.exe,6120,5680,1
+2024-03-15 09:05:14,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: powershell.exe -enc SQBFAFgA,Sysmon.evtx,WORKSTATION-PC,jsmith,powershell.exe,cmd.exe,6244,6120,1
+2024-03-15 09:05:18,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Network Connection: powershell.exe -> 185.220.101.45:443,Sysmon.evtx,WORKSTATION-PC,jsmith,powershell.exe,,6244,,3
+2024-03-15 09:05:22,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,File Create: C:\Users\jsmith\AppData\Local\Temp\svc.exe,Sysmon.evtx,WORKSTATION-PC,jsmith,powershell.exe,,6244,,11
+2024-03-15 09:05:30,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: svc.exe,Sysmon.evtx,WORKSTATION-PC,jsmith,svc.exe,powershell.exe,6300,6244,1
+2024-03-15 09:06:01,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: whoami.exe,Sysmon.evtx,WORKSTATION-PC,jsmith,whoami.exe,svc.exe,6312,6300,1
+2024-03-15 09:06:05,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: systeminfo.exe,Sysmon.evtx,WORKSTATION-PC,jsmith,systeminfo.exe,svc.exe,6320,6300,1
+2024-03-15 09:06:10,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: net.exe view /domain,Sysmon.evtx,WORKSTATION-PC,jsmith,net.exe,svc.exe,6330,6300,1
+2024-03-15 09:06:15,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: ipconfig.exe /all,Sysmon.evtx,WORKSTATION-PC,jsmith,ipconfig.exe,svc.exe,6340,6300,1
+2024-03-15 09:07:00,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Registry Set Value: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\svc,Sysmon.evtx,WORKSTATION-PC,jsmith,svc.exe,,6300,,13
+2024-03-15 09:08:30,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: schtasks.exe /create /sc minute /mo 30 /tn WindowsUpdate /tr svc.exe,Sysmon.evtx,WORKSTATION-PC,jsmith,schtasks.exe,svc.exe,6350,6300,1
+2024-03-15 09:10:00,Content Modification Time,EVT,Microsoft-Windows-Security-Auditing,Logon Type 10 (RemoteInteractive),Security.evtx,DC01,admin,,,,,4624
+2024-03-15 09:10:15,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: psexec.exe \\DC01 -s cmd.exe,Sysmon.evtx,WORKSTATION-PC,jsmith,psexec.exe,svc.exe,6400,6300,1
+2024-03-15 09:10:30,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: cmd.exe (via PsExec service),Sysmon.evtx,DC01,SYSTEM,cmd.exe,psexesvc.exe,2100,1888,1
+2024-03-15 09:11:00,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: ntdsutil.exe "ac i ntds" ifm "create full c:\temp\ntds",Sysmon.evtx,DC01,SYSTEM,ntdsutil.exe,cmd.exe,2200,2100,1
+2024-03-15 09:12:00,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: 7z.exe a c:\temp\ntds.7z c:\temp\ntds -pPassword123,Sysmon.evtx,DC01,SYSTEM,7z.exe,cmd.exe,2300,2100,1
+2024-03-15 09:13:00,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Network Connection: rclone.exe -> mega.nz:443,Sysmon.evtx,DC01,SYSTEM,rclone.exe,cmd.exe,2400,2100,1
+2024-03-15 09:15:00,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: vssadmin.exe delete shadows /all /quiet,Sysmon.evtx,DC01,SYSTEM,vssadmin.exe,cmd.exe,2500,2100,1
+2024-03-15 09:15:30,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: bcdedit.exe /set {default} recoveryenabled no,Sysmon.evtx,DC01,SYSTEM,bcdedit.exe,cmd.exe,2600,2100,1
+2024-03-15 09:16:00,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: wevtutil.exe cl Security,Sysmon.evtx,DC01,SYSTEM,wevtutil.exe,cmd.exe,2700,2100,1
+2024-03-15 09:20:00,Content Modification Time,EVT,Microsoft-Windows-Security-Auditing,Audit log cleared,Security.evtx,DC01,SYSTEM,,,,,1102
+2024-03-15 10:00:00,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: teamviewer.exe,Sysmon.evtx,WORKSTATION-PC,jsmith,teamviewer.exe,explorer.exe,7000,1820,1
+2024-03-15 10:01:00,Content Modification Time,EVT,Microsoft-Windows-Sysmon/Operational,Process Create: anydesk.exe,Sysmon.evtx,WORKSTATION-PC,jsmith,anydesk.exe,explorer.exe,7100,1820,1
+2024-03-15 14:30:00,Content Modification Time,EVT,Microsoft-Windows-Security-Auditing,Logon Type 3 (Network),Security.evtx,FILESERVER,jsmith,,,,,4624
+2024-03-15 14:31:00,Content Modification Time,FILE,NTFS $MFT,\\FILESERVER\Share\Financial\*.xlsx -> C:\staging\data.7z,MFT,FILESERVER,jsmith,,,,,

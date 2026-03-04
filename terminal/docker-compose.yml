@@ -1,0 +1,12 @@
+services:
+  irflow-tui:
+    build: .
+    image: irflow-tui:latest
+    stdin_open: true    # -i (interactive)
+    tty: true           # -t (allocate pseudo-TTY)
+    volumes:
+      - ./evidence:/data    # Mount evidence folder
+      - ./test-data:/test   # Built-in test data
+    # Override CMD with your files:
+    # docker compose run irflow-tui /data/timeline.csv
+    # docker compose run irflow-tui --theme matrix /test/logon-events.csv

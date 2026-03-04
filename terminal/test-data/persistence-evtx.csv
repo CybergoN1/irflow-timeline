@@ -1,0 +1,21 @@
+TimeCreated,EventID,Channel,Computer,MapDescription,PayloadData1,PayloadData2,PayloadData3,PayloadData4,PayloadData5,PayloadData6,UserName
+2024-11-15 08:12:16,4698,Security,WORKSTATION01,Scheduled Task Created,WindowsUpdate,\WindowsUpdate,C:\Users\jsmith\AppData\Local\Temp\svc.exe,OnLogon,SYSTEM,,jsmith
+2024-11-15 08:12:20,13,Microsoft-Windows-Sysmon/Operational,WORKSTATION01,Registry value set,HKCU\Software\Microsoft\Windows\CurrentVersion\Run,WindowsUpdate,C:\Users\jsmith\AppData\Local\Temp\svc.exe,REG_SZ,,,jsmith
+2024-11-15 08:12:25,7045,System,WORKSTATION01,Service installed,EvilSvc,C:\Users\jsmith\AppData\Local\Temp\svc.exe,Auto Start,LocalSystem,,,jsmith
+2024-11-15 08:12:30,13,Microsoft-Windows-Sysmon/Operational,WORKSTATION01,Registry value set,HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce,Updater,"powershell -nop -w hidden -enc JABjAD0...",REG_SZ,,,SYSTEM
+2024-11-15 08:14:00,4657,Security,WORKSTATION01,Registry value modified,\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\sethc.exe,Debugger,C:\Windows\System32\cmd.exe,REG_SZ,,,jsmith
+2024-11-15 08:14:05,13,Microsoft-Windows-Sysmon/Operational,WORKSTATION01,Registry value set,HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\sethc.exe,Debugger,C:\Windows\System32\cmd.exe,REG_SZ,,,jsmith
+2024-11-15 08:14:10,4657,Security,WORKSTATION01,Registry value modified,\REGISTRY\MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon,Userinit,"C:\Windows\system32\userinit.exe,C:\Users\jsmith\AppData\Local\Temp\svc.exe",REG_SZ,,,jsmith
+2024-11-15 08:14:15,13,Microsoft-Windows-Sysmon/Operational,WORKSTATION01,Registry value set,HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon,Shell,"explorer.exe,C:\Users\jsmith\AppData\Local\Temp\svc.exe",REG_SZ,,,jsmith
+2024-11-15 08:15:00,5861,Microsoft-Windows-WMI-Activity/Operational,WORKSTATION01,WMI consumer created,CommandLineEventConsumer,EvilConsumer,"cmd.exe /c C:\Users\jsmith\AppData\Local\Temp\svc.exe",__EventFilter,,__FilterToConsumerBinding,SYSTEM
+2024-11-15 08:15:05,19,Microsoft-Windows-Sysmon/Operational,WORKSTATION01,WmiEventFilter activity detected,__EventFilter,EvilFilter,"SELECT * FROM __InstanceCreationEvent WITHIN 60 WHERE TargetInstance ISA 'Win32_LogonSession'",WMI,,,SYSTEM
+2024-11-15 08:15:06,20,Microsoft-Windows-Sysmon/Operational,WORKSTATION01,WmiEventConsumer activity detected,CommandLineEventConsumer,EvilConsumer,"cmd.exe /c C:\Users\jsmith\AppData\Local\Temp\svc.exe",WMI,,,SYSTEM
+2024-11-15 08:15:07,21,Microsoft-Windows-Sysmon/Operational,WORKSTATION01,WmiEventConsumerToFilter activity detected,__FilterToConsumerBinding,EvilFilter:EvilConsumer,,WMI,,,SYSTEM
+2024-11-15 08:16:00,7040,System,WORKSTATION01,Service state changed,Windows Update,Disabled,Auto Start,,,,SYSTEM
+2024-11-15 08:16:05,7040,System,WORKSTATION01,Service state changed,Windows Defender,Disabled,Auto Start,,,,SYSTEM
+2024-11-15 08:16:10,13,Microsoft-Windows-Sysmon/Operational,WORKSTATION01,Registry value set,HKLM\SOFTWARE\Policies\Microsoft\Windows Defender,DisableAntiSpyware,1,REG_DWORD,,,SYSTEM
+2024-11-15 08:17:00,4720,Security,DC01,User account created,admin_backdoor,CORP,Normal Account,Enabled,,,jsmith
+2024-11-15 08:17:05,4728,Security,DC01,Member added to security-enabled global group,admin_backdoor,Domain Admins,CORP,,,,jsmith
+2024-11-15 08:17:10,4732,Security,DC01,Member added to security-enabled local group,admin_backdoor,Administrators,CORP,,,,jsmith
+2024-11-15 08:18:00,1102,Security,WORKSTATION01,Audit log cleared,,,,,,Security,jsmith
+2024-11-15 08:18:05,104,System,WORKSTATION01,Event log cleared,System,,,,,System,jsmith
