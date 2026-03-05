@@ -60,6 +60,7 @@ const KEYMAP = {
   "f":           "filter-column",
   "F":           "clear-column-filter",
   "C-a":         "clear-all-filters",
+  "C-x":         "clear-all-tab-filters",
 
   // ── Panels & tools ──
   "H":           "histogram",

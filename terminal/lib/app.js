@@ -38,6 +38,7 @@ const { createLateralMovement } = require("./widgets/lateral-movement");
 const { createPersistenceView } = require("./widgets/persistence-view");
 const { createGapAnalysis } = require("./widgets/gap-analysis");
 const { createIocMatcher } = require("./widgets/ioc-matcher");
+const { createFilterBar } = require("./widgets/filter-bar");
 const { createExportDialog } = require("./widgets/export-dialog");
 const { createReportDialog } = require("./widgets/report-dialog");
 const { createSessionDialog } = require("./widgets/session-dialog");
@@ -107,9 +108,18 @@ function createApp(opts = {}) {
   });
   splashContent.setContent(logoArt.join("\n"));
 
+  let _splashVisible = true;
+
   function hideSplash() {
+    if (!_splashVisible) return;
+    _splashVisible = false;
     splash.hide();
     splash.detach();
+    tabBar.widget.show();
+    searchBar.widget.show();
+    grid.widget.show();
+    statusBar.widget.show();
+    filterBar.update(); // show filter bar if filters are active
     screen.render();
   }
 
@@ -122,6 +132,7 @@ function createApp(opts = {}) {
   const searchBar = createSearchBar(blessed, screen, state, theme, handleSearch);
   const grid = createDataGrid(blessed, screen, state, theme, db);
   const statusBar = createStatusBar(blessed, screen, state, theme);
+  const filterBar = createFilterBar(blessed, screen, state, theme, grid.widget);
   const importProgress = createImportProgress(blessed, screen, theme);
   const detailPanel = createDetailPanel(blessed, screen, state, theme);
   const helpOverlay = createHelpOverlay(blessed, screen, state, theme);
@@ -139,6 +150,14 @@ function createApp(opts = {}) {
   const exportDialog = createExportDialog(blessed, screen, state, theme, db);
   const reportDialog = createReportDialog(blessed, screen, state, theme, db);
   const sessionDialog = createSessionDialog(blessed, screen, state, theme);
+
+  // Hide main UI widgets while splash is visible
+  if (_splashVisible) {
+    tabBar.widget.hide();
+    searchBar.widget.hide();
+    grid.widget.hide();
+    statusBar.widget.hide();
+  }
 
   // ── Panel management: hide previous panel when switching ──
   const panels = {
@@ -230,6 +249,10 @@ function createApp(opts = {}) {
     }
   });
   keys.on("clear-all-filters", () => state.clearFilters());
+  keys.on("clear-all-tab-filters", () => {
+    state.clearAllTabFilters();
+    grid.fetchRows();
+  });
 
   // Panels & tools
   keys.on("histogram", () => histogram.show());
@@ -400,6 +423,7 @@ function createApp(opts = {}) {
 
       // Auto-fit columns and fetch initial data
       grid.fetchRows().then(() => {
+        screen.alloc();
         grid.autoFitColumns();
       });
 

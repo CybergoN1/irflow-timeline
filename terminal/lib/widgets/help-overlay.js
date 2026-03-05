@@ -49,7 +49,8 @@ function createHelpOverlay(blessed, screen, state, theme) {
   {${kc}-fg}s{/}    Sort current column
   {${kc}-fg}f{/}    Filter current column (values)
   {${kc}-fg}F{/}    Clear column filter
-  {${kc}-fg}Ctrl+a{/}  Clear ALL filters
+  {${kc}-fg}Ctrl+a{/}  Clear filters (this tab)
+  {${kc}-fg}Ctrl+x{/}  Clear filters (all tabs)
 
  {${dc}-fg}\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500{/}
 

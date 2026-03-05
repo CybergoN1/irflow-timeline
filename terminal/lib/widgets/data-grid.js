@@ -270,7 +270,7 @@ function createDataGrid(blessed, screen, state, theme, db) {
     try {
       const opts = state.getQueryOptions();
       const result = db.queryRows(state.activeTabId, opts);
-      state.setRows(result.rows || [], result.totalRows || 0);
+      state.setRows(result.rows || [], result.totalFiltered || 0);
     } catch {}
   }
 
@@ -281,12 +281,13 @@ function createDataGrid(blessed, screen, state, theme, db) {
 
   // ── Navigation ──
   function moveDown(n = 1) {
-    const maxRow = Math.min(state.rows.length - 1, dataBox.height - 1);
+    const visibleRows = dataBox.height;
+    const maxRow = Math.min(state.rows.length - 1, visibleRows - 1);
     const newRow = state.selectedRow + n;
     if (newRow > maxRow) {
-      const newOffset = state.offset + n;
-      if (newOffset + state.selectedRow < state.totalRows) {
-        state.offset = Math.min(newOffset, Math.max(0, state.totalRows - state.limit));
+      const maxOffset = Math.max(0, state.totalRows - visibleRows);
+      if (state.offset < maxOffset) {
+        state.offset = Math.min(state.offset + n, maxOffset);
         debouncedFetch();
       }
     } else {
@@ -320,8 +321,9 @@ function createDataGrid(blessed, screen, state, theme, db) {
   }
 
   function goLast() {
-    state.offset = Math.max(0, state.totalRows - state.limit);
-    state.selectedRow = Math.min(state.limit - 1, state.totalRows - 1 - state.offset);
+    const visibleRows = dataBox.height;
+    state.offset = Math.max(0, state.totalRows - visibleRows);
+    state.selectedRow = Math.min(visibleRows - 1, state.totalRows - 1 - state.offset);
     debouncedFetch();
   }
 

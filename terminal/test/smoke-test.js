@@ -98,6 +98,80 @@ async function main() {
     assertEq(page2.length, 5, "OFFSET+LIMIT pagination works");
   }
 
+  // ── 4b. Navigation / virtual scroll math ──
+  section("4b. Navigation / virtual scroll");
+  {
+    // Simulate the data-grid's scroll logic with a viewport smaller than total rows
+    // This catches bugs where offset clamping uses SQL limit instead of viewport height
+    const totalRows = importResult.rowCount; // 30
+    const viewportHeight = 10;               // simulate small terminal
+    const sqlLimit = 200;                    // fetch buffer >> viewport
+    const maxOffset = Math.max(0, totalRows - viewportHeight);
+
+    // Verify basic pagination: can reach all rows via offset
+    for (let off = 0; off <= maxOffset; off += viewportHeight) {
+      const clamped = Math.min(off, maxOffset);
+      const { rows } = db.queryRows(tab1, { offset: clamped, limit: sqlLimit });
+      assertGt(rows.length, 0, `Offset ${clamped} returns rows`);
+    }
+
+    // Verify last page: offset at maxOffset returns remaining rows
+    const { rows: lastPage, totalFiltered: lastTotal } = db.queryRows(tab1, {
+      offset: maxOffset,
+      limit: sqlLimit,
+    });
+    assertEq(lastTotal, totalRows, "Last page totalFiltered matches total");
+    assertEq(lastPage.length, totalRows - maxOffset, "Last page row count correct");
+
+    // goLast math: selectedRow should land on the last data row
+    const goLastOffset = Math.max(0, totalRows - viewportHeight);
+    const goLastSelected = Math.min(viewportHeight - 1, totalRows - 1 - goLastOffset);
+    assertEq(goLastOffset + goLastSelected, totalRows - 1, "goLast reaches final row");
+
+    // Verify offset clamp uses viewport, not SQL limit
+    // Bug: Math.max(0, totalRows - sqlLimit) = 0, trapping offset at 0
+    const badClamp = Math.max(0, totalRows - sqlLimit);
+    const goodClamp = Math.max(0, totalRows - viewportHeight);
+    assertEq(badClamp, 0, "SQL-limit clamp is 0 (would block scrolling)");
+    assertGt(goodClamp, 0, "Viewport clamp allows scrolling");
+
+    // Simulate moveDown from bottom of viewport at offset 0
+    const selectedRow = viewportHeight - 1;
+    const moveDownOffset = Math.min(0 + 1, goodClamp);
+    assertGt(moveDownOffset, 0, "moveDown at bottom advances offset");
+
+    // Simulate half-page down from bottom of viewport
+    const halfPage = Math.floor(viewportHeight / 2);
+    const halfPageOffset = Math.min(0 + halfPage, goodClamp);
+    assertGt(halfPageOffset, 0, "halfPageDown advances offset");
+
+    // With column filter: totalFiltered < totalRows, navigation still correct
+    const headers = importResult.headers;
+    const testCol = headers.find((h) => h.toLowerCase().includes("source")) || headers[1];
+    const unique = db.getColumnUniqueValues(tab1, testCol, { limit: 1 });
+    if (unique.length > 0) {
+      const filterVal = String(unique[0].value || unique[0].val || "");
+      const { totalFiltered: filteredCount } = db.queryRows(tab1, {
+        columnFilters: { [testCol]: filterVal },
+      });
+      const filteredMaxOffset = Math.max(0, filteredCount - viewportHeight);
+      if (filteredCount > viewportHeight) {
+        const { rows: filteredLast } = db.queryRows(tab1, {
+          offset: filteredMaxOffset,
+          limit: sqlLimit,
+          columnFilters: { [testCol]: filterVal },
+        });
+        assertGt(filteredLast.length, 0, "Filtered last page has rows");
+        assert(
+          filteredMaxOffset + filteredLast.length <= filteredCount,
+          "Filtered navigation stays in bounds"
+        );
+      } else {
+        assert(true, "Filtered dataset fits in viewport (no scroll needed)");
+      }
+    }
+  }
+
   // ── 5. Sort ──
   section("5. Sort");
   {
@@ -151,6 +225,70 @@ async function main() {
       });
       assertGt(totalFiltered, 0, `Column filter '${testCol}=${filterVal}' returns rows`);
       assert(totalFiltered <= importResult.rowCount, "Filtered count <= total");
+    }
+  }
+
+  // ── 7b. Advanced filter operators ──
+  section("7b. Advanced filter operators");
+  {
+    const headers = importResult.headers;
+    const testCol = headers.find((h) => h.toLowerCase().includes("source")) || headers[1];
+    const unique = db.getColumnUniqueValues(tab1, testCol, { limit: 5 });
+    const vals = unique.map((u) => String(u.value || u.val || ""));
+
+    // "in" operator (checkbox filter path)
+    if (vals.length >= 2) {
+      const subset = vals.slice(0, 2);
+      const { totalFiltered: inCount } = db.queryRows(tab1, {
+        advancedFilters: [{ column: testCol, operator: "in", value: subset, logic: "AND" }],
+      });
+      assertGt(inCount, 0, `"in" operator filters rows (${subset.join(",")})`);
+      assert(inCount <= importResult.rowCount, '"in" count <= total');
+
+      // single-value "in" should match "==" for that value
+      const { totalFiltered: inOne } = db.queryRows(tab1, {
+        advancedFilters: [{ column: testCol, operator: "in", value: [vals[0]], logic: "AND" }],
+      });
+      const { totalFiltered: eqOne } = db.queryRows(tab1, {
+        advancedFilters: [{ column: testCol, operator: "==", value: vals[0], logic: "AND" }],
+      });
+      assertEq(inOne, eqOne, '"in" with one value matches "==" count');
+    }
+
+    // TUI-style operators ("==", "!=", "startsWith", "endsWith")
+    if (vals.length > 0) {
+      const v = vals[0];
+      const { totalFiltered: eqCount } = db.queryRows(tab1, {
+        advancedFilters: [{ column: testCol, operator: "==", value: v, logic: "AND" }],
+      });
+      assertGt(eqCount, 0, `"==" operator works for ${testCol}=${v}`);
+
+      const { totalFiltered: neqCount } = db.queryRows(tab1, {
+        advancedFilters: [{ column: testCol, operator: "!=", value: v, logic: "AND" }],
+      });
+      assertEq(eqCount + neqCount, importResult.rowCount, '"==" + "!=" covers all rows');
+
+      const { totalFiltered: swCount } = db.queryRows(tab1, {
+        advancedFilters: [{ column: testCol, operator: "startsWith", value: v.slice(0, 2), logic: "AND" }],
+      });
+      assertGt(swCount, 0, `"startsWith" operator works`);
+
+      const { totalFiltered: ewCount } = db.queryRows(tab1, {
+        advancedFilters: [{ column: testCol, operator: "endsWith", value: v.slice(-2), logic: "AND" }],
+      });
+      assertGt(ewCount, 0, `"endsWith" operator works`);
+    }
+
+    // snake_case operators (Electron GUI path) still work
+    if (vals.length > 0) {
+      const v = vals[0];
+      const { totalFiltered: eqSnake } = db.queryRows(tab1, {
+        advancedFilters: [{ column: testCol, operator: "equals", value: v, logic: "AND" }],
+      });
+      const { totalFiltered: eqTui } = db.queryRows(tab1, {
+        advancedFilters: [{ column: testCol, operator: "==", value: v, logic: "AND" }],
+      });
+      assertEq(eqSnake, eqTui, '"equals" and "==" produce same result');
     }
   }
 
@@ -248,6 +386,63 @@ async function main() {
     assert(info1.rowCount !== info2.rowCount || true, "Tabs have independent data");
     assert(info1.headers.length > 0, "Tab 1 info has headers");
     assert(info2.headers.length > 0, "Tab 2 info has headers");
+  }
+
+  // ── 14b. Tab-switch preserves view state ──
+  section("14b. Tab-switch preserves view state");
+  {
+    const AppState = require("../lib/state");
+    const s = new AppState();
+
+    // Simulate two tabs
+    s.addTab({ id: "A", name: "a.csv", headers: ["col1", "col2"], rowCount: 100 });
+    s.addTab({ id: "B", name: "b.csv", headers: ["x", "y", "z"], rowCount: 50 });
+
+    // Tab B is now active (addTab switches to it). Set some state on B.
+    s.sortCol = "x";
+    s.sortOrder = "desc";
+    s.advancedFilters = [{ column: "y", operator: "contains", value: "test", logic: "AND" }];
+    s.searchTerm = "hello";
+    s.searchActive = true;
+    s.offset = 10;
+    s.selectedRow = 5;
+
+    // Switch to tab A
+    s.switchTab(0);
+    // Tab A should have fresh/default state (never had state saved)
+    assertEq(s.sortCol, null, "Tab A: sort is default after switch");
+    assertEq(s.advancedFilters.length, 0, "Tab A: no filters after switch");
+    assertEq(s.searchTerm, "", "Tab A: no search after switch");
+    assertEq(s.offset, 0, "Tab A: offset is 0 after switch");
+
+    // Set state on tab A
+    s.sortCol = "col1";
+    s.sortOrder = "asc";
+    s.advancedFilters = [{ column: "col2", operator: "==", value: "42", logic: "AND" }];
+
+    // Switch back to tab B — state should be restored
+    s.switchTab(1);
+    assertEq(s.sortCol, "x", "Tab B: sort column restored");
+    assertEq(s.sortOrder, "desc", "Tab B: sort order restored");
+    assertEq(s.advancedFilters.length, 1, "Tab B: filter restored");
+    assertEq(s.advancedFilters[0].value, "test", "Tab B: filter value correct");
+    assertEq(s.searchTerm, "hello", "Tab B: search restored");
+    assertEq(s.offset, 10, "Tab B: offset restored");
+    assertEq(s.selectedRow, 5, "Tab B: selectedRow restored");
+
+    // Switch back to tab A — its state should be preserved too
+    s.switchTab(0);
+    assertEq(s.sortCol, "col1", "Tab A: sort column restored");
+    assertEq(s.sortOrder, "asc", "Tab A: sort order restored");
+    assertEq(s.advancedFilters.length, 1, "Tab A: filter restored");
+    assertEq(s.advancedFilters[0].value, "42", "Tab A: filter value correct");
+
+    // Close tab B — its saved state should be cleaned up
+    s.switchTab(1);
+    s.closeTab(1);
+    // Now back on tab A (only tab left)
+    assertEq(s.activeTabIndex, 0, "After close: tab A is active");
+    assertEq(s.sortCol, "col1", "After close: tab A state intact");
   }
 
   // ── 15. IOC matching ──

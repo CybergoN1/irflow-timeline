@@ -27,7 +27,6 @@ let _logBuf = [];
 function dbg(tag, msg, data) {
   const ts = new Date().toISOString();
   const line = `[${ts}] [${tag}] ${msg}${data !== undefined ? " " + JSON.stringify(data, null, 0) : ""}`;
-  console.error(line);
   _logBuf.push(line);
   if (_logBuf.length >= 50) _flushLog();
 }
@@ -968,23 +967,35 @@ class TimelineDB {
           params.push(`%${f.value}%`);
           return `${sc} NOT LIKE ?`;
         case "equals":
+        case "==":
           params.push(f.value);
           return `${sc} = ?`;
         case "not_equals":
+        case "!=":
           params.push(f.value);
           return `${sc} != ?`;
         case "starts_with":
+        case "startsWith":
           params.push(`${f.value}%`);
           return `${sc} LIKE ?`;
         case "ends_with":
+        case "endsWith":
           params.push(`%${f.value}`);
           return `${sc} LIKE ?`;
         case "greater_than":
+        case ">":
           params.push(f.value);
           return `CAST(${sc} AS REAL) > CAST(? AS REAL)`;
+        case ">=":
+          params.push(f.value);
+          return `CAST(${sc} AS REAL) >= CAST(? AS REAL)`;
         case "less_than":
+        case "<":
           params.push(f.value);
           return `CAST(${sc} AS REAL) < CAST(? AS REAL)`;
+        case "<=":
+          params.push(f.value);
+          return `CAST(${sc} AS REAL) <= CAST(? AS REAL)`;
         case "is_empty":
           return `(${sc} IS NULL OR ${sc} = '')`;
         case "is_not_empty":
@@ -992,6 +1003,13 @@ class TimelineDB {
         case "regex":
           params.push(f.value);
           return `${sc} REGEXP ?`;
+        case "in": {
+          const vals = Array.isArray(f.value) ? f.value : [f.value];
+          if (vals.length === 0) return "1=0";
+          const placeholders = vals.map(() => "?").join(",");
+          params.push(...vals);
+          return `${sc} IN (${placeholders})`;
+        }
         default:
           params.push(`%${f.value}%`);
           return `${sc} LIKE ?`;
@@ -2012,7 +2030,7 @@ class TimelineDB {
     const whereClause = `WHERE ${whereConditions.join(" AND ")}`;
     const extractFn = granularity === "hour" ? `substr(extract_datetime_minute(${safeCol}), 1, 13)` : `extract_date(${safeCol})`;
     const sql = `SELECT ${extractFn} as day, COUNT(*) as cnt FROM data ${whereClause} GROUP BY day HAVING day IS NOT NULL ORDER BY day`;
-    try { return db.prepare(sql).all(...params); } catch (err) { console.error(`Histogram query failed: ${err.message}`); return []; }
+    try { return db.prepare(sql).all(...params); } catch (err) { dbg("DB", "Histogram query failed", { error: err.message }); return []; }
   }
 
   /**

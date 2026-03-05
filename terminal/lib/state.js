@@ -66,6 +66,9 @@ class AppState extends EventEmitter {
     this.visibleColumns = [];
     this.columnWidths = {};
     this.pinnedColumns = [];
+
+    // ── Per-tab view state ──
+    this._tabViewState = new Map(); // tabId -> saved view state
   }
 
   // ── Tab management ──
@@ -89,25 +92,37 @@ class AppState extends EventEmitter {
 
   switchTab(index) {
     if (index >= 0 && index < this.tabs.length && index !== this.activeTabIndex) {
+      this._saveTabViewState();
       this.activeTabIndex = index;
       const tab = this.activeTab;
       if (tab) {
-        this.visibleColumns = tab.headers.slice();
+        this._restoreTabViewState(tab.id);
+      } else {
+        this.resetView();
       }
-      this.resetView();
       this.emit("tab-changed");
     }
   }
 
   closeTab(index) {
     if (index < 0 || index >= this.tabs.length) return;
+    const closedTab = this.tabs[index];
+    if (closedTab) this._tabViewState.delete(closedTab.id);
     this.tabs.splice(index, 1);
     if (this.tabs.length === 0) {
       this.activeTabIndex = -1;
-    } else if (this.activeTabIndex >= this.tabs.length) {
-      this.activeTabIndex = this.tabs.length - 1;
+      this.resetView();
+    } else {
+      if (this.activeTabIndex >= this.tabs.length) {
+        this.activeTabIndex = this.tabs.length - 1;
+      }
+      const tab = this.activeTab;
+      if (tab) {
+        this._restoreTabViewState(tab.id);
+      } else {
+        this.resetView();
+      }
     }
-    this.resetView();
     this.emit("tab-changed");
     this.emit("tabs-updated");
   }
@@ -127,6 +142,53 @@ class AppState extends EventEmitter {
     this.advancedFilters = [];
     this.tagFilter = null;
     this.bookmarkedOnly = false;
+  }
+
+  _saveTabViewState() {
+    const tab = this.activeTab;
+    if (!tab) return;
+    this._tabViewState.set(tab.id, {
+      offset: this.offset,
+      selectedRow: this.selectedRow,
+      colScroll: this.colScroll,
+      sortCol: this.sortCol,
+      sortOrder: this.sortOrder,
+      searchTerm: this.searchTerm,
+      searchMode: this.searchMode,
+      searchCondition: this.searchCondition,
+      searchActive: this.searchActive,
+      advancedFilters: this.advancedFilters.slice(),
+      tagFilter: this.tagFilter,
+      bookmarkedOnly: this.bookmarkedOnly,
+      visibleColumns: this.visibleColumns.slice(),
+      columnWidths: { ...this.columnWidths },
+      pinnedColumns: this.pinnedColumns.slice(),
+      colorRules: this.colorRules.slice(),
+    });
+  }
+
+  _restoreTabViewState(tabId) {
+    const saved = this._tabViewState.get(tabId);
+    if (saved) {
+      this.offset = saved.offset;
+      this.selectedRow = saved.selectedRow;
+      this.colScroll = saved.colScroll;
+      this.sortCol = saved.sortCol;
+      this.sortOrder = saved.sortOrder;
+      this.searchTerm = saved.searchTerm;
+      this.searchMode = saved.searchMode;
+      this.searchCondition = saved.searchCondition;
+      this.searchActive = saved.searchActive;
+      this.advancedFilters = saved.advancedFilters.slice();
+      this.tagFilter = saved.tagFilter;
+      this.bookmarkedOnly = saved.bookmarkedOnly;
+      this.visibleColumns = saved.visibleColumns.slice();
+      this.columnWidths = { ...saved.columnWidths };
+      this.pinnedColumns = saved.pinnedColumns.slice();
+      this.colorRules = saved.colorRules.slice();
+    } else {
+      this.resetView();
+    }
   }
 
   // ── Sort ──
@@ -181,6 +243,19 @@ class AppState extends EventEmitter {
     this.offset = 0;
     this.selectedRow = 0;
     this.emit("filter-changed");
+  }
+
+  clearAllTabFilters() {
+    // Clear filters in all saved tab view states
+    for (const [tabId, saved] of this._tabViewState) {
+      saved.advancedFilters = [];
+      saved.tagFilter = null;
+      saved.bookmarkedOnly = false;
+      saved.offset = 0;
+      saved.selectedRow = 0;
+    }
+    // Clear current tab filters
+    this.clearFilters();
   }
 
   // ── UI ──

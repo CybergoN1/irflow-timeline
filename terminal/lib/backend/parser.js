@@ -46,7 +46,6 @@ let _logBuf = [];
 function dbg(tag, msg, data) {
   const ts = new Date().toISOString();
   const line = `[${ts}] [${tag}] ${msg}${data !== undefined ? " " + JSON.stringify(data, null, 0) : ""}`;
-  console.error(line);
   _logBuf.push(line);
   if (_logBuf.length >= 50) _flushLog();
 }
