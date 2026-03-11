@@ -622,6 +622,9 @@ function createApp(opts = {}) {
 
   // ── Cleanup ──
   function cleanup() {
+    process.removeListener("SIGINT", onSigInt);
+    process.removeListener("SIGTERM", onSigTerm);
+    process.removeListener("exit", onExit);
     try { db.closeAll(); } catch {}
     screen.destroy();
   }
@@ -654,18 +657,14 @@ function createApp(opts = {}) {
     screen.render();
   });
 
-  // Clean exit
-  process.on("SIGINT", () => {
-    cleanup();
-    process.exit(0);
-  });
-  process.on("SIGTERM", () => {
-    cleanup();
-    process.exit(0);
-  });
-  process.on("exit", () => {
-    try { db.closeAll(); } catch {}
-  });
+  // Clean exit — named functions so cleanup() can remove them on theme cycle
+  function onSigInt() { cleanup(); process.exit(0); }
+  function onSigTerm() { cleanup(); process.exit(0); }
+  function onExit() { try { db.closeAll(); } catch {} }
+
+  process.on("SIGINT", onSigInt);
+  process.on("SIGTERM", onSigTerm);
+  process.on("exit", onExit);
 
   return { screen, state, db };
 }

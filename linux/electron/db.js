@@ -968,23 +968,35 @@ class TimelineDB {
           params.push(`%${f.value}%`);
           return `${sc} NOT LIKE ?`;
         case "equals":
+        case "==":
           params.push(f.value);
           return `${sc} = ?`;
         case "not_equals":
+        case "!=":
           params.push(f.value);
           return `${sc} != ?`;
         case "starts_with":
+        case "startsWith":
           params.push(`${f.value}%`);
           return `${sc} LIKE ?`;
         case "ends_with":
+        case "endsWith":
           params.push(`%${f.value}`);
           return `${sc} LIKE ?`;
         case "greater_than":
+        case ">":
           params.push(f.value);
           return `CAST(${sc} AS REAL) > CAST(? AS REAL)`;
+        case ">=":
+          params.push(f.value);
+          return `CAST(${sc} AS REAL) >= CAST(? AS REAL)`;
         case "less_than":
+        case "<":
           params.push(f.value);
           return `CAST(${sc} AS REAL) < CAST(? AS REAL)`;
+        case "<=":
+          params.push(f.value);
+          return `CAST(${sc} AS REAL) <= CAST(? AS REAL)`;
         case "is_empty":
           return `(${sc} IS NULL OR ${sc} = '')`;
         case "is_not_empty":
@@ -992,6 +1004,13 @@ class TimelineDB {
         case "regex":
           params.push(f.value);
           return `${sc} REGEXP ?`;
+        case "in": {
+          const vals = Array.isArray(f.value) ? f.value : [f.value];
+          if (vals.length === 0) return "1=0";
+          const placeholders = vals.map(() => "?").join(",");
+          params.push(...vals);
+          return `${sc} IN (${placeholders})`;
+        }
         default:
           params.push(`%${f.value}%`);
           return `${sc} LIKE ?`;
